@@ -1,0 +1,63 @@
+NoPerms: "&cYou are not permitted to execute this command!"
+NoItem: "&cYou need to hold an item!"
+InvalidItem: "&cThis item does not include any customized information!"
+OnlyPlayers: "&cThis can only be executed as an online player!"
+GroupNotExist: "&cThis group does not exist!"
+
+Property:
+  InvalidProperty: "&cInvalid property!"
+  ValueMissing: "&cValue is missing!"
+  Success: "&aSet property &2%option% &ato &2%value%&a."
+  SuccessGroup: "&aSet property &2%option% &afor group &e%group% &ato &2%value%&a."
+
+Condition:
+  ValueMissing: "&cValue is missing!"
+  InvalidCondition: "&cInvalid condition!"
+  Success: "&aSet condition &2%option% &ato &2%value%&a."
+  SuccessGroup: "&aSet condition &2%option% &afor group &e%group% &ato &2%value%&a."
+  Hand:
+    InvalidMaterial: "&cInvalid material type!"
+    NoDisplayname: "&cThis item does not have a displayname!"
+    NoLores: "&cThis item does not have any lores!"
+
+Group:
+  Create:
+    NotPossible: "&cGroup cannot be named that way!"
+    AlreadyGiven: "&cThis name is already given!"
+    Created: "&aCreated group &2%group%&a."
+
+  Delete:
+    NotPossible: "&cGroup with that name cannot be deleted!"
+    NotExist: "&cGroup cannot be named that way!"
+    Deleted: "&cDeleted group &4%group% &c."
+
+Info:
+  Hand:
+    Message:
+      - "&7Information of item in hand:"
+      - " &7Nutrition: &e%nutrition%"
+      - " &7Saturation: &e%saturation%"
+      - " &7Seconds: &e%seconds%"
+      - " &7Conditions: &cNot available for in-hand items"
+
+  Group:
+    Message:
+      - "&7Information of group: &f%group%"
+      - " &7Nutrition: &e%nutrition%"
+      - " &7Saturation: &e%saturation%"
+      - " &7Seconds: &e%seconds%"
+
+    Conditions:
+      NoConditions: "&cNot available for in-hand items"
+      Message:
+        - "&7Conditions: &cNot available for in-hand items"
+        - "  &7Permission: &e%permission%"
+        - "  &7World: &e"
+        - "  &7Material: &e%material%"
+        - "  &7Displayname: &e%displayname%"
+
+      Lore:
+        NoLore: "  &7Lore: &cNo lore!"
+        Message:
+         - "  &7Lore: &e"
+         - "    &8- &a%lore%"
