@@ -422,33 +422,40 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
         switch (length) {
 
             case 1:
-                suggestions.addAll(Arrays.asList("uneatable", "list", "reload", "info", "create", "delete", "property", "condition"));
+                if(checkPerms(sender, "uneatable")) suggestions.add("uneatable");
+                if(checkPerms(sender, "list")) suggestions.add("list");
+                if(checkPerms(sender, "reload")) suggestions.add("reload");
+                if(checkPerms(sender, "info")) suggestions.add("info");
+                if(checkPerms(sender, "create")) suggestions.add("create");
+                if(checkPerms(sender, "delete")) suggestions.add("delete");
+                if(checkPerms(sender, "property")) suggestions.add("property");
+                if(checkPerms(sender, "condition")) suggestions.add("condition");
                 break;
 
             case 2:
-                if(args[0].equalsIgnoreCase("property")) {
+                if(checkPerms(sender, "property") && args[0].equalsIgnoreCase("property")) {
                     suggestions.addAll(Arrays.asList(EatableItems.getItemGroupsNames()));
                     suggestions.add("hand");
-                } else if(args[0].equalsIgnoreCase("condition") || args[0].equals("delete") || args[0].equals("info"))
+                } else if(args[0].equalsIgnoreCase("condition") && checkPerms(sender, "condition") || args[0].equals("delete") && checkPerms(sender, "delete") || args[0].equals("info") && checkPerms(sender, "info"))
                     suggestions.addAll(Arrays.asList(EatableItems.getItemGroupsNames()));
                 break;
 
             case 3:
-                if(args[0].equalsIgnoreCase("property"))
+                if(args[0].equalsIgnoreCase("property") && checkPerms(sender, "property"))
                     suggestions.addAll(Arrays.asList("saturation", "nutrition", "fast", "seconds", "alwayseatable"));
 
-                if(args[0].equalsIgnoreCase("condition"))
+                if(args[0].equalsIgnoreCase("condition") && checkPerms(sender, "condition"))
                     suggestions.addAll(Arrays.asList("world", "permission", "material", "lore", "displayname", "item"));
                 break;
 
             case 4:
-                if(args[0].equalsIgnoreCase("property") && (args[2].equalsIgnoreCase("alwayseatable") || args[2].equalsIgnoreCase("fast")))
+                if(args[0].equalsIgnoreCase("property") && (args[2].equalsIgnoreCase("alwayseatable") || args[2].equalsIgnoreCase("fast")) && checkPerms(sender, "property"))
                     suggestions.addAll(Arrays.asList("true", "false"));
 
-                if(args[0].equalsIgnoreCase("condition") && args[2].equalsIgnoreCase("world"))
+                if(args[0].equalsIgnoreCase("condition") && args[2].equalsIgnoreCase("world") && checkPerms(sender, "condition"))
                     Bukkit.getWorlds().forEach(world -> suggestions.add(world.getName()));
 
-                if(args[0].equalsIgnoreCase("condition") && args[2].equalsIgnoreCase("material"))
+                if(args[0].equalsIgnoreCase("condition") && args[2].equalsIgnoreCase("material") && checkPerms(sender, "condition"))
                     Arrays.asList(Material.values()).forEach(material -> suggestions.add(material.name().toLowerCase()));
         }
 
@@ -456,8 +463,12 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
         return result;
     }
 
+    private boolean checkPerms(CommandSender sender, String permission) {
+        return sender.isOp() || (sender.hasPermission("eatable.use") && (permission == null || permission.equals("use") || sender.hasPermission("eatable." + permission)));
+    }
+
     private boolean checkPermsAndResponse(CommandSender sender, String permission) {
-        boolean permitted = sender.hasPermission("eatable." + permission);
+        boolean permitted = checkPerms(sender, permission);
         if(!permitted) MessageUtil.send(sender, "NoPerms", "%permission%", permission);
         return permitted;
     }
