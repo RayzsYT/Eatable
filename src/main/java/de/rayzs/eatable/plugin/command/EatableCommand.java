@@ -300,7 +300,7 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                                 return true;
                             }
 
-                            if (stack.getType() != Material.AIR) {
+                            if (stack.getType() == Material.AIR) {
                                 MessageUtil.send(sender, "NoItem");
                                 return true;
                             }
