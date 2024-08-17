@@ -3,10 +3,12 @@ package de.rayzs.eatable.plugin;
 import de.rayzs.eatable.api.EatableItems;
 import de.rayzs.eatable.plugin.command.EatableCommand;
 import de.rayzs.eatable.plugin.events.PlayerInteract;
+import de.rayzs.eatable.utils.configuration.Configurator;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.util.logging.Logger;
 
 public class EatablePlugin extends JavaPlugin {
@@ -18,6 +20,8 @@ public class EatablePlugin extends JavaPlugin {
     public void onEnable() {
         PLUGIN = this;
         LOGGER = getLogger();
+
+        Configurator.createResourcedFile(getDataFolder(), "files\\messages.yml", "messages.yml", false);
 
         EatableItems.load();
 
