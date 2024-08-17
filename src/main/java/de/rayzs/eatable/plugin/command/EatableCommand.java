@@ -73,7 +73,7 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
 
                         if(!checkPermsAndResponse(sender, "list")) return true;
 
-                        MessageUtil.Message message = MessageUtil.getMessage(sender, "Group.List");
+                        MessageUtil.Message message = MessageUtil.getMessage("Group.List");
                         List<String> groupListLines = message.getLines();
                         String targetLine = null;
 
@@ -195,7 +195,7 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                             return true;
                         }
 
-                        MessageUtil.Message message = MessageUtil.getMessage(sender, "Info.Conditions.Lore");
+                        MessageUtil.Message message = MessageUtil.getMessage("Info.Conditions.Lore");
                         List<String> loreLines = message.getLines();
                         String targetLine = null;
 

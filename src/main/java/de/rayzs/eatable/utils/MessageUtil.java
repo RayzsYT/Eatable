@@ -16,12 +16,12 @@ public class MessageUtil {
     }
 
     public static void send(CommandSender sender, String key, String... replacements) {
-        getMessage(sender, key, replacements).sendMessage(sender);
+        getMessage(key).sendMessage(sender, replacements);
     }
 
-    public static Message getMessage(CommandSender sender, String key, String... replacements) {
+    public static Message getMessage(String key) {
         Message message = null;
-        if(MESSAGES.containsKey(key)) {
+        if(!MESSAGES.containsKey(key)) {
             try {
 
                 Object obj = FILE.get(key);
