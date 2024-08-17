@@ -1,8 +1,10 @@
-NoPerms: "&cYou are not permitted to execute this command!"
+NoPerms: "&cYou are not permitted to execute this command! [%permission%]"
 NoItem: "&cYou need to hold an item!"
 InvalidItem: "&cThis item does not include any customized information!"
 OnlyPlayers: "&cThis can only be executed as an online player!"
 GroupNotExist: "&cThis group does not exist!"
+SyntaxMessage: "&cInvalid syntax! Please use '/eatable' instead"
+Reload: "&aReloaded all files!"
 
 Property:
   InvalidProperty: "&cInvalid property!"
@@ -13,8 +15,7 @@ Property:
 Condition:
   ValueMissing: "&cValue is missing!"
   InvalidCondition: "&cInvalid condition!"
-  Success: "&aSet condition &2%option% &ato &2%value%&a."
-  SuccessGroup: "&aSet condition &2%option% &afor group &e%group% &ato &2%value%&a."
+  Success: "&aSet condition &2%option% &afor group &e%group% &ato &2%value%&a."
   Hand:
     InvalidMaterial: "&cInvalid material type!"
     NoDisplayname: "&cThis item does not have a displayname!"
@@ -24,15 +25,23 @@ Group:
   Create:
     NotPossible: "&cGroup cannot be named that way!"
     AlreadyGiven: "&cThis name is already given!"
-    Created: "&aCreated group &2%group%&a."
+    Success: "&aCreated group &2%group%&a."
 
   Delete:
     NotPossible: "&cGroup with that name cannot be deleted!"
-    NotExist: "&cGroup cannot be named that way!"
-    Deleted: "&cDeleted group &4%group% &c."
+    Success: "&cDeleted group &4%group%&c."
+
+  List:
+    - "7List of all groups:"
+    - "  §8- §e%group%"
+
+Uneatable:
+  NotConsumable: "&cThis item is not consumable!"
+  Success: "&aThe item in your hand cannot be consumed any longer!"
 
 Info:
   Hand:
+    NoInformation: "&cThe item you're holding does not contain any information!"
     Message:
       - "&7Information of item in hand:"
       - " &7Nutrition: &e%nutrition%"
@@ -48,7 +57,7 @@ Info:
       - " &7Seconds: &e%seconds%"
 
     Conditions:
-      NoConditions: "&cNot available for in-hand items"
+      NoConditions: "&7  Conditions: &cNone"
       Message:
         - "&7Conditions: &cNot available for in-hand items"
         - "  &7Permission: &e%permission%"
