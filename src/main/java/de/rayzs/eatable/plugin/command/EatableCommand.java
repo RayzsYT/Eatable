@@ -1,6 +1,8 @@
 package de.rayzs.eatable.plugin.command;
 
 import de.rayzs.eatable.api.EatableItems;
+import de.rayzs.eatable.utils.MessageUtil;
+import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 import de.rayzs.eatable.api.item.*;
 import org.bukkit.entity.Player;
@@ -17,10 +19,7 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         int length = args.length;
 
-        if(!sender.hasPermission("eatable.use")) {
-            sender.sendMessage("§cYou are not permitted to execute this command!");
-            return true;
-        }
+        if(!checkPermsAndResponse(sender, "use")) return true;
 
         Player player = null;
         if(sender instanceof Player playerSender) player = playerSender;
@@ -31,56 +30,85 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                 String task = args[0].toLowerCase();
 
                 if (length == 1) {
-                    if (task.equals("info")) {
+
+                    if (task.equals("reload")) {
+                        if(!checkPermsAndResponse(sender, "reload")) return true;
+
+                        MessageUtil.clear();
+                        EatableItems.getConfig().reload();
+                        EatableItems.load();
+
+                        MessageUtil.send(sender, "Reload");
+                        return true;
+                    } else if (task.equals("info")) {
+
+                        if(!checkPermsAndResponse(sender, "info")) return true;
+
                         if (player == null) {
-                            sender.sendMessage("§cThis can only be executed as an online player!");
+                            MessageUtil.send(sender, "OnlyPlayers");
                             return true;
                         }
 
                         ItemStack stack = player.getItemInHand();
                         if (stack.getType() == Material.AIR) {
-                            player.sendMessage("§cYou need to hold an item!");
+                            MessageUtil.send(sender, "NoItem");
                             return true;
                         }
 
                         if(!stack.hasItemMeta() || stack.getItemMeta().hasFood()) {
-                            sender.sendMessage("§cThe item you're holding does not have any information!");
+                            MessageUtil.send(sender, "NoInformation");
                             return true;
                         }
 
                         ItemFood itemFood = EatableItems.getItemFromStack(stack);
 
-                        sender.sendMessage("§7Information of item in hand:");
-                        sender.sendMessage(" §7Nutrition: §e" + itemFood.getNutrition());
-                        sender.sendMessage(" §7Saturation: §e" + itemFood.getSaturation());
-                        sender.sendMessage(" §7Seconds: §e" + itemFood.getSeconds());
-                        sender.sendMessage(" §7Conditions: §cNot available for in-hand items");
+                        MessageUtil.send(sender, "Info.Hand.Message",
+                                "%nutrition%", String.valueOf(itemFood.getNutrition()),
+                                "%saturation%", String.valueOf(itemFood.getSaturation()),
+                                "%seconds%", String.valueOf(itemFood.getSeconds()));
+
                         return true;
 
                     } else if (task.equals("list")) {
 
-                        sender.sendMessage("§7List of all groups:");
-                        for (String itemGroupsName : EatableItems.getItemGroupsNames())
-                            sender.sendMessage("  §8- §e" + itemGroupsName);
+                        if(!checkPermsAndResponse(sender, "list")) return true;
+
+                        MessageUtil.Message message = MessageUtil.getMessage(sender, "Group.List");
+                        List<String> groupListLines = message.getLines();
+                        String targetLine = null;
+
+                        for (String groupListLine : groupListLines) {
+                            if(targetLine == null && groupListLine.contains("%group%")) {
+                                targetLine = groupListLine;
+                                for (String groupName : EatableItems.getItemGroupsNames())
+                                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', targetLine.replace("%group%", groupName)));
+
+                                continue;
+                            }
+
+                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', groupListLine));
+                        }
 
                         return true;
 
                     } else if (task.equals("uneatable")) {
 
+                        if(!checkPermsAndResponse(sender, "uneatable")) return true;
+
                         if (player == null) {
-                            sender.sendMessage("§cThis can only be executed as an online player!");
+                            MessageUtil.send(sender, "OnlyPlayers");
                             return true;
                         }
 
                         ItemStack stack = player.getItemInHand();
 
                         if (stack.getType() == Material.AIR) {
-                            player.sendMessage("§cYou need to hold an item!");
+                            MessageUtil.send(sender, "NoItem");
                             return true;
                         }
 
                         if(!stack.hasItemMeta() || !stack.getItemMeta().hasFood()) {
-                            sender.sendMessage("This item cannot be consumed!");
+                            MessageUtil.send(sender, "Uneatable.NotConsumable");
                             return true;
                         }
 
@@ -88,7 +116,7 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                         meta.setFood(null);
                         stack.setItemMeta(meta);
 
-                        sender.sendMessage("&aThe item in your hand cannot be consumed any longer!");
+                        MessageUtil.send(sender, "Uneatable.Success");
                         return true;
                     }
                 }
@@ -98,67 +126,91 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
 
                     if (task.equals("create")) {
 
+                        if(!checkPermsAndResponse(sender, "create")) return true;
+
                         if (sub.equalsIgnoreCase("hand")) {
-                            sender.sendMessage("§cGroup cannot be named that way!");
+                            MessageUtil.send(sender, "Group.Create.NotPossible");
                             return true;
                         }
 
                         if (EatableItems.getItemFromName(sub) != null) {
-                            sender.sendMessage("§cThis name is already given!");
+                            MessageUtil.send(sender, "Group.Create.AlreadyGiven");
                             return true;
                         }
 
                         EatableItems.create(sub, EatableItems.createEmptyItemFood());
-                        sender.sendMessage("§aCreated group §2" + sub + "§a.");
+                        MessageUtil.send(sender, "Group.Create.Success", "%group%", sub);
                         return true;
 
                     } else  if (task.equals("delete")) {
 
+                        if(!checkPermsAndResponse(sender, "delete")) return true;
+
                         if (sub.equalsIgnoreCase("hand")) {
-                            sender.sendMessage("§cGroup cannot be named that way!");
+                            MessageUtil.send(sender, "Group.Delete.NotPossible");
                             return true;
                         }
 
                         if (EatableItems.getItemFromName(sub) == null) {
-                            sender.sendMessage("§cThis group does not exist!");
+                            MessageUtil.send(sender, "GroupNotExist");
                             return true;
                         }
 
                         EatableItems.delete(sub);
-                        sender.sendMessage("§cDeleted group §4" + sub + "§c.");
+                        MessageUtil.send(sender, "Group.Delete.Success", "%group%", sub);
                         return true;
 
                     } else if (task.equals("info")) {
+
+                        if(!checkPermsAndResponse(sender, "info")) return true;
+
                         ItemFood itemFood = EatableItems.getItemFromName(sub);
 
                         if (itemFood == null) {
-                            sender.sendMessage("§cThis group does not exist!");
+                            MessageUtil.send(sender, "GroupNotExist");
                             return true;
                         }
 
                         ItemConditions conditions = itemFood.getConditions();
 
-                        sender.sendMessage("§7Information of group: §f" + sub);
-                        sender.sendMessage(" §7Nutrition: §e" + itemFood.getNutrition());
-                        sender.sendMessage(" §7Saturation: §e" + itemFood.getSaturation());
-                        sender.sendMessage(" §7Seconds: §e" + itemFood.getSeconds());
-
+                        MessageUtil.send(sender, "Info.Group.Message",
+                                "%group%", sub,
+                                "%nutrition%", String.valueOf(itemFood.getNutrition()),
+                                "%saturation%", String.valueOf(itemFood.getSaturation()),
+                                "%seconds%", String.valueOf(itemFood.getSeconds()));
                         if (conditions == null) {
-                            sender.sendMessage("§7Conditions: §cNone!");
+                            MessageUtil.send(sender, "Info.Group.NoConditions", "%group%", sub);
                             return true;
                         }
 
-                        sender.sendMessage(" §7Conditions:");
-                        sender.sendMessage("  §7Permission: §e" + conditions.getPermission());
-                        sender.sendMessage("  §7World: §e" + conditions.getWorldName());
-                        sender.sendMessage("  §7Material: §e" + conditions.getMaterial());
-                        sender.sendMessage("  §7Displayname: §e" + conditions.getName());
+                        MessageUtil.send(sender, "Info.Group.Message",
+                                "%group%", sub,
+                                "%permission%", conditions.getPermission(),
+                                "%world%", conditions.getWorldName(),
+                                "%material%", conditions.getMaterial().name(),
+                                "%displayname%", conditions.getName());
+
                         if(conditions.getLore() == null) {
-                            sender.sendMessage("  §7Lore: §cNo lore!");
+                            MessageUtil.send(sender, "Info.Group.Lore.NoLore", "%group%", sub);
                             return true;
                         }
-                        sender.sendMessage("  §7Lore: §e");
-                        sender.sendMessage("    §8- §a" + String.join("    §8- §a", conditions.getLore()));
+
+                        MessageUtil.Message message = MessageUtil.getMessage(sender, "Info.Conditions.Lore");
+                        List<String> loreLines = message.getLines();
+                        String targetLine = null;
+
+                        for (String loreLine : loreLines) {
+                            if(targetLine == null && loreLine.contains("%lores%")) {
+                                targetLine = loreLine;
+                                for (String conditionLore : conditions.getLore())
+                                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', targetLine.replace("%lore%", conditionLore)));
+
+                                continue;
+                            }
+
+                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', loreLine));
+                        }
+
                         return true;
                     }
                 }
@@ -169,19 +221,22 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                             value = length == 4 ? args[3].toLowerCase() : null;
 
                     if (task.equals("property")) {
+
+                        if(!checkPermsAndResponse(sender, "property")) return true;
+
                         ItemStack stack = null;
                         ItemFood itemFood;
                         if (target.equalsIgnoreCase("hand")) {
 
                             if (player == null) {
-                                sender.sendMessage("§cThis can only be executed as an online player!");
+                                MessageUtil.send(sender, "OnlyPlayers");
                                 return true;
                             }
 
                             stack = player.getItemInHand();
 
                             if (stack.getType() == Material.AIR) {
-                                player.sendMessage("§cYou need to hold an item!");
+                                MessageUtil.send(sender, "NoItem");
                                 return true;
                             }
 
@@ -191,13 +246,13 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                             itemFood = EatableItems.getItemFromName(target);
 
                             if (itemFood == null) {
-                                sender.sendMessage("§cThis group does not exist!");
+                                MessageUtil.send(sender, "GroupNotExist");
                                 return true;
                             }
                         }
 
                         if (value == null) {
-                            sender.sendMessage("§cValue is missing!");
+                            MessageUtil.send(sender, "Property.ValueMissing");
                             return true;
                         }
 
@@ -216,10 +271,18 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                                 EatableItems.create(target, itemFood);
                             else EatableItems.transformItemEatable(stack, itemFood);
                         }
-                        sender.sendMessage(empty ? "§cInvalid property!" : "§aSet property §2" + option + " §ato §2" + value + "§a.");
+
+                        if(empty) {
+                            MessageUtil.send(sender, "Property.InvalidProperty");
+                            return true;
+                        }
+
+                        MessageUtil.send(sender, target.equalsIgnoreCase("hand") ? "Property.Success" : "Property.SuccessGroup", "%group%", target, "%option%", option, "%value%", value);
                         return true;
 
-                    } else if (task .equals("condition")) {
+                    } else if (task.equals("condition")) {
+
+                        if(!checkPermsAndResponse(sender, "condition")) return true;
 
                         ItemFood itemFood = EatableItems.getItemFromName(target);
                         ItemConditions conditions = itemFood.getConditions();
@@ -228,17 +291,17 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
 
                         if (value == null) {
                             if (!option.equals("hand")) {
-                                sender.sendMessage("§cValue is missing!");
+                                MessageUtil.send(sender, "Condition.ValueMissing");
                                 return true;
                             }
 
                             if (player == null) {
-                                sender.sendMessage("§cThis can only be executed as an online player!");
+                                MessageUtil.send(sender, "OnlyPlayers");
                                 return true;
                             }
 
                             if (stack.getType() != Material.AIR) {
-                                sender.sendMessage("§cYou need to hold an item!");
+                                MessageUtil.send(sender, "NoItem");
                                 return true;
                             }
 
@@ -254,12 +317,12 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                                     if (value.equalsIgnoreCase("hand")) {
 
                                         if (player == null) {
-                                            sender.sendMessage("§cThis can only be executed as an online player!");
+                                            MessageUtil.send(sender, "OnlyPlayers");
                                             return true;
                                         }
 
                                         if (stack.getType() == Material.AIR) {
-                                            sender.sendMessage("§cYou need to hold an item!");
+                                            MessageUtil.send(sender, "NoItem");
                                             return true;
                                         }
 
@@ -268,7 +331,7 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                                         value = value.toUpperCase();
                                         conditions.requiresMaterial(Material.valueOf(value));
                                     } catch (Throwable ignored) {
-                                        sender.sendMessage("§cInvalid material type!");
+                                        MessageUtil.send(sender, "Condition.Hand.InvalidMaterial");
                                         return true;
                                     }
                                 }
@@ -277,17 +340,17 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                                     if (value.equalsIgnoreCase("hand")) {
 
                                         if (player == null) {
-                                            sender.sendMessage("§cThis can only be executed as an online player!");
+                                            MessageUtil.send(sender, "OnlyPlayers");
                                             return true;
                                         }
 
                                         if (stack.getType() != Material.AIR) {
-                                            sender.sendMessage("§cYou need to hold an item!");
+                                            MessageUtil.send(sender, "NoItem");
                                             return true;
                                         }
 
                                         if (!stack.hasItemMeta() || !stack.getItemMeta().hasDisplayName()) {
-                                            sender.sendMessage("§cThis item does not have a displayname!");
+                                            MessageUtil.send(sender, "Condition.Hand.NoDisplayname");
                                             return true;
                                         }
 
@@ -298,17 +361,17 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                                 case "lore" -> {
                                     if (value.equalsIgnoreCase("hand")) {
                                         if (player == null) {
-                                            sender.sendMessage("§cThis can only be executed as an online player!");
+                                            MessageUtil.send(sender, "OnlyPlayers");
                                             return true;
                                         }
 
                                         if (stack.getType() == Material.AIR) {
-                                            sender.sendMessage("§cYou need to hold an item!");
+                                            MessageUtil.send(sender, "NoItem");
                                             return true;
                                         }
 
                                         if (!stack.hasItemMeta() || !stack.getItemMeta().hasLore()) {
-                                            sender.sendMessage("§cDoes item has no lore!");
+                                            MessageUtil.send(sender, "Condition.Hand.NoLores");
                                             return true;
                                         }
 
@@ -323,15 +386,19 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                         if (!target.equalsIgnoreCase("hand") && !empty)
                             EatableItems.create(target, itemFood);
 
-                        sender.sendMessage(empty ? "§cInvalid condition!" : "§aSet condition §2" + option + " §ato §2" + value + "§a.");
+                        if(empty) {
+                            MessageUtil.send(sender, "Condition.InvalidCondition");
+                            return true;
+                        }
+
+                        MessageUtil.send(sender, "Condition.Success", "%group%", target, "%option%", option, "%value%", value);
                         return true;
                     }
                 }
             }
 
         } catch (Throwable ignored) {
-            sender.sendMessage("§cInvalid syntax!");
-            ignored.printStackTrace();
+            MessageUtil.send(sender, "SyntaxMessage");
             return true;
         }
 
@@ -387,5 +454,11 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
 
         suggestions.stream().filter(suggestion -> suggestion.startsWith(args[args.length-1].toLowerCase())).forEach(result::add);
         return result;
+    }
+
+    private boolean checkPermsAndResponse(CommandSender sender, String permission) {
+        boolean permitted = sender.hasPermission("eatable." + permission);
+        if(!permitted) MessageUtil.send(sender, "NoPerms", "%permission%", permission);
+        return permitted;
     }
 }
