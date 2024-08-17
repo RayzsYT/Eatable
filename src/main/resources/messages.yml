@@ -6,6 +6,15 @@ GroupNotExist: "&cThis group does not exist!"
 SyntaxMessage: "&cInvalid syntax! Please use '/eatable' instead"
 Reload: "&aReloaded all files!"
 
+Help:
+  - "&7All available command: &f/%label%&7..."
+  - "&7 list"
+  - "&7 uneatable"
+  - "&7 info <name>"
+  - "&7 create <name>"
+  - "&7 property <hand/name> <property> <hand/value>"
+  - "&7 condition <name> <condition> <hand/value>"
+
 Property:
   InvalidProperty: "&cInvalid property!"
   ValueMissing: "&cValue is missing!"

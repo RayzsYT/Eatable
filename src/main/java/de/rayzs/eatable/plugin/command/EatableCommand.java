@@ -402,13 +402,7 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
             return true;
         }
 
-        sender.sendMessage("§7All available command: §f/" + label + "§7...");
-        sender.sendMessage("§7 list");
-        sender.sendMessage("§7 uneatable");
-        sender.sendMessage("§7 info <name>");
-        sender.sendMessage("§7 create <name>");
-        sender.sendMessage("§7 property <hand/name> <property> <hand/value>");
-        sender.sendMessage("§7 condition <name> <condition> <hand/value>");
+        MessageUtil.send(sender, "Help");
         return true;
     }
 
