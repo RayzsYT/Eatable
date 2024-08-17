@@ -41,8 +41,8 @@ Group:
     Success: "&cDeleted group &4%group%&c."
 
   List:
-    - "7List of all groups:"
-    - "  §8- §e%group%"
+    - "&7List of all groups:"
+    - "  &8- &e%group%"
 
 Uneatable:
   NotConsumable: "&cThis item is not consumable!"
