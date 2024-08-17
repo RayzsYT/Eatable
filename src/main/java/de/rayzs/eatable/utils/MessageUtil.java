@@ -8,14 +8,18 @@ import java.util.*;
 public class MessageUtil {
 
     private static final HashMap<String, Message> MESSAGES = new HashMap<>();
-    private static final Message ERROR_MESSAGE = new Message("&c");
+    private static final Message ERROR_MESSAGE = new Message("&cFailed to load message from message.yml! Check the console for more information.");
     private static final ConfigurationBuilder FILE = Configurator.get("messages");
     
     public static void clear() {
         MESSAGES.clear();
     }
-    
+
     public static void send(CommandSender sender, String key, String... replacements) {
+        getMessage(sender, key, replacements).sendMessage(sender);
+    }
+
+    public static Message getMessage(CommandSender sender, String key, String... replacements) {
         Message message = null;
         if(MESSAGES.containsKey(key)) {
             try {
@@ -34,10 +38,10 @@ public class MessageUtil {
             }
         }
 
-        (message == null ? ERROR_MESSAGE : message).sendMessage(sender, replacements);
+        return message == null ? ERROR_MESSAGE : message;
     }
     
-    private static class Message {
+    public static class Message {
         
         private final List<String> LINES = new ArrayList<>();
 
@@ -59,8 +63,12 @@ public class MessageUtil {
             return this;
         }
 
+        public List<String> getLines() {
+            return LINES;
+        }
+
         public void sendMessage(CommandSender sender, String... replacements) {
-            for (String line : StringUtils.replaceList(LINES, replacements))
+            for (String line : replacements != null ? StringUtils.replaceList(LINES, replacements) : LINES)
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', line));
         }
     }
