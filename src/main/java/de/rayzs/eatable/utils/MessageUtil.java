@@ -20,7 +20,7 @@ public class MessageUtil {
     }
 
     public static Message getMessage(String key) {
-        Message message = null;
+        Message message = MESSAGES.getOrDefault(key, null);
         if(!MESSAGES.containsKey(key)) {
             try {
 
