@@ -15,7 +15,7 @@ public class MessageUtil {
         MESSAGES.clear();
     }
     
-    public static void send(CommandSender sender, String key) {
+    public static void send(CommandSender sender, String key, String... replacements) {
         Message message = null;
         if(MESSAGES.containsKey(key)) {
             try {
@@ -34,7 +34,7 @@ public class MessageUtil {
             }
         }
 
-        (message == null ? ERROR_MESSAGE : message).sendMessage(sender);
+        (message == null ? ERROR_MESSAGE : message).sendMessage(sender, replacements);
     }
     
     private static class Message {
@@ -59,8 +59,8 @@ public class MessageUtil {
             return this;
         }
 
-        public void sendMessage(CommandSender sender) {
-            for (String line : StringUtils.replaceList(LINES))
+        public void sendMessage(CommandSender sender, String... replacements) {
+            for (String line : StringUtils.replaceList(LINES, replacements))
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&', line));
         }
     }
