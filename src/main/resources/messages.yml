@@ -1,4 +1,4 @@
-NoPerms: "&cYou are not permitted to execute this command! [%permission%]"
+NoPerms: "&cYou are not permitted to execute this command! [eatable.%permission%]"
 NoItem: "&cYou need to hold an item!"
 InvalidItem: "&cThis item does not include any customized information!"
 OnlyPlayers: "&cThis can only be executed as an online player!"

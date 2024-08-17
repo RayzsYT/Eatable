@@ -402,7 +402,7 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
             return true;
         }
 
-        MessageUtil.send(sender, "Help");
+        MessageUtil.send(sender, "Help", "%label%", label);
         return true;
     }
 
@@ -458,7 +458,7 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
     }
 
     private boolean checkPerms(CommandSender sender, String permission) {
-        return sender.isOp() || (sender.hasPermission("eatable.use") && (permission == null || permission.equals("use") || sender.hasPermission("eatable." + permission)));
+        return sender.isOp() || (sender.hasPermission("eatable.use") && sender.hasPermission("eatable." + permission));
     }
 
     private boolean checkPermsAndResponse(CommandSender sender, String permission) {
