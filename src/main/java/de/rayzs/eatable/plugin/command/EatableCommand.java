@@ -183,7 +183,7 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                             return true;
                         }
 
-                        MessageUtil.send(sender, "Info.Group.Message",
+                        MessageUtil.send(sender, "Info.Group.Conditions.Message",
                                 "%group%", sub,
                                 "%permission%", conditions.getPermission(),
                                 "%world%", conditions.getWorldName(),
@@ -195,7 +195,7 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                             return true;
                         }
 
-                        MessageUtil.Message message = MessageUtil.getMessage("Info.Conditions.Lore");
+                        MessageUtil.Message message = MessageUtil.getMessage("Info.Group.Conditions.Lore");
                         List<String> loreLines = message.getLines();
                         String targetLine = null;
 
@@ -287,28 +287,9 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                         ItemFood itemFood = EatableItems.getItemFromName(target);
                         ItemConditions conditions = itemFood.getConditions();
                         ItemStack stack = player != null ? player.getItemInHand() : null;
-                        boolean empty = false;
+                        boolean empty = value == null;
 
-                        if (value == null) {
-                            if (!option.equals("hand")) {
-                                MessageUtil.send(sender, "Condition.ValueMissing");
-                                return true;
-                            }
-
-                            if (player == null) {
-                                MessageUtil.send(sender, "OnlyPlayers");
-                                return true;
-                            }
-
-                            if (stack.getType() == Material.AIR) {
-                                MessageUtil.send(sender, "NoItem");
-                                return true;
-                            }
-
-                            conditions = EatableItems.getConditionFromStack(stack);
-
-                        } else {
-
+                        if(!empty) {
                             switch (option) {
                                 case "world" -> conditions.requiresWorld(value);
                                 case "permission" -> conditions.requiresPermission(value);
@@ -344,7 +325,7 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                                             return true;
                                         }
 
-                                        if (stack.getType() != Material.AIR) {
+                                        if (stack.getType() == Material.AIR) {
                                             MessageUtil.send(sender, "NoItem");
                                             return true;
                                         }
@@ -391,7 +372,7 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                             return true;
                         }
 
-                        MessageUtil.send(sender, "Condition.Success", "%group%", target, "%option%", option, "%value%", value);
+                        MessageUtil.send(sender, "Condition.Success" + (value.equalsIgnoreCase("item") ? "Group" : ""), "%group%", target, "%option%", option, "%value%", value);
                         return true;
                     }
                 }
@@ -439,7 +420,7 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                     suggestions.addAll(Arrays.asList("saturation", "nutrition", "fast", "seconds", "alwayseatable"));
 
                 if(args[0].equalsIgnoreCase("condition") && checkPerms(sender, "condition"))
-                    suggestions.addAll(Arrays.asList("world", "permission", "material", "lore", "displayname", "item"));
+                    suggestions.addAll(Arrays.asList("world", "permission", "material", "lore", "displayname"));
                 break;
 
             case 4:
@@ -451,6 +432,9 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
 
                 if(args[0].equalsIgnoreCase("condition") && args[2].equalsIgnoreCase("material") && checkPerms(sender, "condition"))
                     Arrays.asList(Material.values()).forEach(material -> suggestions.add(material.name().toLowerCase()));
+
+                if(args[0].equalsIgnoreCase("condition") && (args[2].equalsIgnoreCase("material") || args[2].equalsIgnoreCase("lore") || args[2].equalsIgnoreCase("displayname")) && checkPerms(sender, "condition"))
+                    suggestions.add("hand");
         }
 
         suggestions.stream().filter(suggestion -> suggestion.startsWith(args[args.length-1].toLowerCase())).forEach(result::add);
