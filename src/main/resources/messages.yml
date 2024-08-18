@@ -3,7 +3,7 @@ NoItem: "&cYou need to hold an item!"
 InvalidItem: "&cThis item does not include any customized information!"
 OnlyPlayers: "&cThis can only be executed as an online player!"
 GroupNotExist: "&cThis group does not exist!"
-SyntaxMessage: "&cInvalid syntax! Please use '/eatable' instead"
+SyntaxMessage: "&cInvalid syntax! Please use '/eatable' to see all available commands."
 Reload: "&aReloaded all files!"
 
 Help:
