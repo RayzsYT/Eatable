@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.*;
 import java.util.*;
 
-public class ItemConditions {
+public class ItemConditions implements Cloneable {
 
     private String name = null, worldName = null, permission = null;
 
@@ -104,8 +104,9 @@ public class ItemConditions {
     @Override
     public ItemConditions clone() {
         try {
-            // TODO: copy mutable state here, so the clone can't change the internals of the original
-            return (ItemConditions) super.clone();
+            ItemConditions clone = (ItemConditions) super.clone();
+            clone.lore = this.lore == null ? null : new ArrayList<>(this.lore);
+            return clone;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }

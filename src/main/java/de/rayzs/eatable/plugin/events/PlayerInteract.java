@@ -14,7 +14,7 @@ public class PlayerInteract implements Listener {
         ItemStack stack = event.getItem();
 
         if(stack == null) return;
-        boolean alreadyFood = stack.hasItemMeta() && stack.getItemMeta().hasFood();
+        boolean alreadyFood = EatableItems.isEatableOverridden(stack);
 
         if(!EatableItems.handleItem(player, stack)) return;
         if(!alreadyFood) event.setCancelled(true);
