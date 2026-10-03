@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.command.*;
 import org.bukkit.Material;
 import org.bukkit.Bukkit;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
 
@@ -49,14 +48,14 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                             return true;
                         }
 
-                        ItemStack stack = player.getItemInHand();
+                        ItemStack stack = player.getInventory().getItemInMainHand();
                         if (stack.getType() == Material.AIR) {
                             MessageUtil.send(sender, "NoItem");
                             return true;
                         }
 
-                        if(!stack.hasItemMeta() || stack.getItemMeta().hasFood()) {
-                            MessageUtil.send(sender, "NoInformation");
+                        if(!EatableItems.isEatableOverridden(stack)) {
+                            MessageUtil.send(sender, "Info.Hand.NoInformation");
                             return true;
                         }
 
@@ -100,21 +99,19 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                             return true;
                         }
 
-                        ItemStack stack = player.getItemInHand();
+                        ItemStack stack = player.getInventory().getItemInMainHand();
 
                         if (stack.getType() == Material.AIR) {
                             MessageUtil.send(sender, "NoItem");
                             return true;
                         }
 
-                        if(!stack.hasItemMeta() || !stack.getItemMeta().hasFood()) {
+                        if(!EatableItems.isEatableOverridden(stack)) {
                             MessageUtil.send(sender, "Uneatable.NotConsumable");
                             return true;
                         }
 
-                        ItemMeta meta = stack.getItemMeta();
-                        meta.setFood(null);
-                        stack.setItemMeta(meta);
+                        EatableItems.resetEatable(stack);
 
                         MessageUtil.send(sender, "Uneatable.Success");
                         return true;
@@ -233,7 +230,7 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
                                 return true;
                             }
 
-                            stack = player.getItemInHand();
+                            stack = player.getInventory().getItemInMainHand();
 
                             if (stack.getType() == Material.AIR) {
                                 MessageUtil.send(sender, "NoItem");
@@ -286,7 +283,7 @@ public class EatableCommand implements CommandExecutor, TabExecutor {
 
                         ItemFood itemFood = EatableItems.getItemFromName(target);
                         ItemConditions conditions = itemFood.getConditions();
-                        ItemStack stack = player != null ? player.getItemInHand() : null;
+                        ItemStack stack = player != null ? player.getInventory().getItemInMainHand() : null;
                         boolean empty = value == null;
 
                         if(!empty) {

@@ -1,15 +1,15 @@
 package de.rayzs.eatable.api;
 
-import org.bukkit.craftbukkit.v1_21_R1.inventory.components.CraftFoodComponent;
-import org.bukkit.craftbukkit.v1_21_R1.inventory.CraftItemStack;
-import net.minecraft.world.food.FoodProperties;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.Consumable;
+import io.papermc.paper.datacomponent.item.FoodProperties;
+import io.papermc.paper.datacomponent.item.UseRemainder;
 import de.rayzs.eatable.utils.configuration.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.ItemStack;
 import de.rayzs.eatable.api.item.*;
 import org.bukkit.entity.Player;
 import org.bukkit.Material;
-import org.bukkit.inventory.meta.components.FoodComponent;
 
 import java.util.*;
 
@@ -52,18 +52,32 @@ public class EatableItems {
     public static ItemFood getItemFromStack(ItemStack stack) {
         ItemFood itemFood = new ItemFood();
 
-        if(stack.hasItemMeta()) {
-            ItemMeta meta = stack.getItemMeta();
-            if(meta.hasFood()) {
-                FoodComponent component = meta.getFood();
-                itemFood.setNutrition(component.getNutrition());
-                itemFood.setSaturation(component.getSaturation());
-                itemFood.setAlwaysEatable(component.canAlwaysEat());
-                itemFood.setSeconds(component.getEatSeconds());
-            }
+        FoodProperties food = stack.getData(DataComponentTypes.FOOD);
+        if(food != null) {
+            itemFood.setNutrition(food.nutrition());
+            itemFood.setSaturation(food.saturation());
+            itemFood.setAlwaysEatable(food.canAlwaysEat());
         }
 
+        Consumable consumable = stack.getData(DataComponentTypes.CONSUMABLE);
+        if(consumable != null)
+            itemFood.setSeconds(consumable.consumeSeconds());
+
+        UseRemainder remainder = stack.getData(DataComponentTypes.USE_REMAINDER);
+        if(remainder != null)
+            itemFood.setConvertsToStack(remainder.transformInto());
+
         return itemFood;
+    }
+
+    public static boolean isEatableOverridden(ItemStack stack) {
+        return stack.isDataOverridden(DataComponentTypes.FOOD);
+    }
+
+    public static void resetEatable(ItemStack stack) {
+        stack.resetData(DataComponentTypes.FOOD);
+        stack.resetData(DataComponentTypes.CONSUMABLE);
+        stack.resetData(DataComponentTypes.USE_REMAINDER);
     }
 
     public static ItemConditions getConditionFromStack(ItemStack stack) {
@@ -81,21 +95,19 @@ public class EatableItems {
     }
 
     public static void transformItemEatable(ItemStack stack, ItemFood itemFood) {
-        ItemMeta meta = stack.getItemMeta();
-        FoodProperties.Builder foodPropertyBuilder =
-                new FoodProperties.Builder()
-                .nutrition(itemFood.getNutrition())
-                .saturationModifier(itemFood.getSaturation())
-                .alwaysEdible();
+        stack.setData(DataComponentTypes.FOOD, FoodProperties.food()
+                .nutrition(Math.max(0, itemFood.getNutrition()))
+                .saturation(itemFood.getSaturation())
+                .canAlwaysEat(itemFood.isAlwaysEatable()));
 
-        if(itemFood.getConvertsToStack() != null && itemFood.getConvertsToStack().getType() != Material.AIR)
-            foodPropertyBuilder.usingConvertsTo(CraftItemStack.asNMSCopy(itemFood.getConvertsToStack()).getItem());
+        float seconds = itemFood.isFast() ? itemFood.getSeconds() / 2f : itemFood.getSeconds();
+        stack.setData(DataComponentTypes.CONSUMABLE, Consumable.consumable()
+                .consumeSeconds(Math.max(0f, seconds)));
 
-        if(itemFood.isFast())
-            foodPropertyBuilder.fast();
-
-        meta.setFood(new CraftFoodComponent(foodPropertyBuilder.build()));
-        stack.setItemMeta(meta);
+        ItemStack remainder = itemFood.getConvertsToStack();
+        if(remainder != null && remainder.getType() != Material.AIR)
+            stack.setData(DataComponentTypes.USE_REMAINDER, UseRemainder.useRemainder(remainder));
+        else stack.resetData(DataComponentTypes.USE_REMAINDER);
     }
 
     public static boolean create(String name, ItemFood itemFood) {
@@ -127,10 +139,10 @@ public class EatableItems {
         itemFood.setFast((boolean) CONFIG.get(name + ".fast"));
         itemFood.setAlwaysEatable((boolean) CONFIG.get(name + ".alwaysEatable"));
 
-        if(CONFIG.get("convertsTo") != null)
+        if(CONFIG.get(name + ".convertsTo") != null)
             itemFood.setConvertsToStack((ItemStack) CONFIG.get(name + ".convertsTo"));
 
-        conditions.requiresWorld((String) CONFIG.get(name + ".conditions.world"));
+        conditions.requiresWorld((String) CONFIG.get(name + ".conditions.worldName"));
         conditions.requiresLore((List<String>) CONFIG.get(name + ".conditions.lore"));
         conditions.requiresMaterial(Material.valueOf((String) CONFIG.get(name + ".conditions.material")));
         conditions.requiresName((String) CONFIG.get(name + ".conditions.displayName"));
